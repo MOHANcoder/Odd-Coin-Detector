@@ -124,13 +124,18 @@ const spritesSet = [
         height: (CENTER * 0.02)
     }
 ];
-
 const keys = {
     ArrowRight: false,
     ArrowLeft: false,
     ArrowUp: false,
     ArrowDown: false
 }
+
+var axis = {
+    right:(CENTER * 2) - 100,
+    left:(CENTER * 2) - 100
+}
+
 class Sprite {
     constructor({ shape, position, velocity }) {
         this.position = position;
@@ -150,59 +155,91 @@ class Sprite {
         this.freezeIt = true;
         this.keyName = "Nothing";
         this.stageNotChanged = true;
+        this.stages = {
+            1: true,
+            2: false
+        };
+        this.direction = "stable";
+        this.nextMove = true;
     }
 
     unFreeze() {
         this.freezeIt = false;
     }
-
     freeze() {
         this.freezeIt = true;
     }
-
     draw() {
         c.fillStyle = "blue";
         c.fillRect(this.position.x, this.position.y, this.shape.width, this.shape.height);
     }
-
     update() {
         this.draw();
     }
-
     setBoundary({ x, y }) {
         this.limit.x = x;
         this.limit.y = y;
     }
-
-    upLift(y){
-        console.log(this.position.y+" "+this.limit.y);
-        this.limit.y=this.position.y-y;
-        this.addVelocity({x:0,y:-5});
+    upLift(y) {
+        this.limit.y = this.position.y - y;
+        axis.right = rightPlate.limit.y;
+        axis.left = leftPlate.limit.y;
+        this.direction = "up";
         this.unFreeze();
-        this.stageNotChanged = false;
-        console.log(this.position.y+" "+this.limit.y);
+        if (this.keyName == "RightPlate") {
+            platec.right.forEach(e => {
+                coins[e].upLift(y);
+                // coins[e].setBoundary(rightPlate.limit);
+                coins[e].setBoundary({...coins[e].limit,y:axis.right});
+            });
+            platec.left.forEach(e => {
+                coins[e].downLift(y);
+                coins[e].setBoundary({...coins[e].limit,y:axis.left});
+            });
+        } else if (this.keyName == "LeftPlate") {
+            platec.right.forEach(e => {
+                coins[e].downLift(y);
+                coins[e].setBoundary({...coins[e].limit,y:axis.right});
+            });
+            platec.left.forEach(e => {
+                coins[e].upLift(y);
+                coins[e].setBoundary(leftPlate.limit);
+            });
+        }
     }
-
+    downLift(y) {
+        this.limit.y = this.position.y + y;
+        axis.right = rightPlate.limit.y;
+        axis.left = leftPlate.limit.y;
+        this.direction = "down";
+        this.unFreeze();
+        if (this.keyName == "RightPlate") {
+            platec.right.forEach(e => {
+                coins[e].downLift(y);
+                coins[e].setBoundary({...coins[e].limit,y:axis.right});
+            });
+            platec.left.forEach(e => {
+                coins[e].upLift(y);
+                coins[e].setBoundary({...coins[e].limit,y:axis.left});
+            });
+        } else if (this.keyName == "LeftPlate") {
+            platec.right.forEach(e => {
+                coins[e].upLift(y);
+                coins[e].setBoundary({...coins[e].limit,y:axis.right});
+            });
+            platec.left.forEach(e => {
+                coins[e].downLift(y);
+                coins[e].setBoundary({...coins[e].limit,y:axis.left});
+            });
+        }
+    }
     addVelocity(velocity) {
         this.velocity.x += velocity.x;
         this.velocity.y += velocity.y;
     }
-
     checkAndChangeItToStageTwo() {
-        // console.log(`${(this.position.x+this.velocity.x)} , ${this.limit.x} ,${(this.position.y+this.velocity.y)} , ${this.limit.y}`);
-        // console.log((this.position.y+this.velocity.y) >= this.limit.y);
-        if(this.stageNotChanged)
-        {if (((this.position.y + this.shape.height) >= this.limit.y)) {
-            console.log(this.keyName);
-            this.setBoundary(this.stageTwoLimit);
-            this.currentStage = 2;
-            this.unFreeze();
-        }}else{
-            this.upLift(100);
-        }
     }
 }
-
 class Coin extends Sprite {
 
     constructor(props) {
@@ -217,19 +254,39 @@ class Coin extends Sprite {
     update() {
         this.draw();
         this.checkAndChangeItToStageTwo();
-        if (!this.freezeIt) {
-            this.position.x += this.velocity.x;
-            this.position.y += this.velocity.y;
-            if (((this.position.y + this.shape.height) >= this.limit.y)) {
-                this.velocity.y = 0;
-                this.freeze();
-            } else {
-                this.velocity.y += gravity;
+        if (this.direction == "down") {
+            if (!this.freezeIt) {
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                if (((this.position.y + this.shape.height) >= this.limit.y)) {
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y += gravity;
+                }
+                if (this.position.x + this.shape.width >= this.limit.x) {
+                    this.velocity.x = 0;
+                } else {
+                    this.velocity.x += gravity;
+                }
             }
-            if (this.position.x + this.shape.width >= this.limit.x) {
-                this.velocity.x = 0;
-            } else {
-                this.velocity.x += gravity;
+        } else if (this.direction == "up") {
+            if (!this.freezeIt) {
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                if (((this.position.y + this.shape.height) <= this.limit.y)) {
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y -= gravity;
+                }
+                if (this.position.x + this.shape.width <= this.limit.x) {
+                    this.velocity.x = 0;
+                } else {
+                    this.velocity.x -= gravity;
+                }
             }
         }
     }
@@ -244,24 +301,32 @@ class Plate extends Sprite {
             y: (CENTER * 2) - 100
         };
     }
-
     update() {
         this.draw();
-        if (!this.freezeIt) {
-            this.checkAndChangeItToStageTwo();
-            // this.position.x += this.velocity.x;
-            this.position.y += this.velocity.y;
-            if (((this.position.y + this.shape.height) >= this.limit.y)) {
-                this.velocity.y = 0;
-                this.freeze();
-            } else {
-                this.velocity.y += gravity;
+        if (this.direction == "down") {
+            if (!this.freezeIt) {
+                this.position.y += this.velocity.y;
+                if (((this.position.y + this.shape.height) >= this.limit.y)) {
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y += gravity;
+                }
             }
-            // if (this.position.x + this.shape.width >= this.limit.x) {
-            //     this.velocity.x = 0;
-            // } else {
-            //     this.velocity.x += gravity;
-            // }
+        } else {
+            if (!this.freezeIt) {
+                // this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                if (((this.position.y + this.shape.height) <= this.limit.y)) {
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y -= gravity;
+                }
+
+            }
         }
     }
 
@@ -301,13 +366,16 @@ const coins = new Array(8).fill(0).map((_, i) => {
             y: (CENTER * 2) - (CENTER * 0.5)
         });
 
-        _.stageTwoLimit = {
-            x: _.limit.x,
-            y: (CENTER * 2) - 100
-        };
+    _.stageTwoLimit = {
+        x: _.limit.x,
+        y: (CENTER * 2) - 100
+    };
 
-    if (i != 1)
+    if (i >= 0)
         _.freeze();
+    else {
+        _.direction = "down";
+    }
 
     return _;
 });
@@ -357,8 +425,6 @@ const leftPlate = new Plate({
     }
 });
 
-// leftPlate.unFreeze();
-
 const rightPlate = new Plate({
     position: {
         x: CENTER + (CENTER * 0.2),
@@ -391,6 +457,17 @@ const coinStand = new Sprite({
 
 rightPlate.keyName = "RightPlate";
 leftPlate.keyName = "LeftPlate";
+document.getElementById("b").onclick = function () {
+    coins[parseInt(document.getElementById("i").value)].unFreeze();
+    coins[parseInt(document.getElementById("i").value)].direction = "down";
+    console.log("----------------------------");
+    coins.forEach(e=>console.log(e.keyName+" "+JSON.stringify(e.position)));
+}
+
+var platec = {
+    left: [],
+    right: []
+};
 
 function animate() {
     window.requestAnimationFrame(animate);
@@ -402,33 +479,25 @@ function animate() {
     coinStand.update();
     coins.forEach(coin => {
         coin.update();
-        if (coin.currentStage == 2) {
-            
+        if (coin.direction == "reached" && coin.nextMove) {
+            console.log("stage 2");
+            // coin.downLift(50);
+            coin.nextMove = !coin.nextMove;
             let coinNumber = parseInt(coin.keyName.substring(coin.keyName.length - 1))
-            if (coinNumber > 4) {
-                if (rightPlate.currentStage != 2) {
-                    rightPlate.unFreeze();
-                    rightPlate.setBoundary(rightPlate.stageTwoLimit);
-                    rightPlate.currentStage = 2;
-                    leftPlate.upLift(100);
-                }
-            }else{
-                if (leftPlate.currentStage != 2) {
-                    leftPlate.unFreeze();
-                    leftPlate.setBoundary(leftPlate.stageTwoLimit);
-                    leftPlate.currentStage = 2;
-                    rightPlate.upLift(100);
-                }
+            if (coinNumber > 3) {
+                if (platec.right.indexOf(coinNumber - 1) == -1)
+                    platec.right.push(coinNumber - 1);
+                rightPlate.downLift(50);
+                leftPlate.upLift(50);
+
+            } else {
+                if (platec.left.indexOf(coinNumber - 1) == -1)
+                    platec.left.push(coinNumber - 1);
+                rightPlate.upLift(50);
+                leftPlate.downLift(50);
             }
         }
     });
-    // doCollision();
-    // coin.velocity = {x:0,y:0};
-    // if(keys.ArrowUp){
-    //     coin.velocity.y = -1;
-    // }else if(keys.ArrowDown){
-    //     coin.velocity.y = 1;
-    // }
 }
 
 window.addEventListener("keydown", (event) => {
