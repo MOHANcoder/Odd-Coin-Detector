@@ -1,0 +1,120 @@
+<html>
+<head>
+<style>
+input[type=number], select 
+{
+  width: 50%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.button
+{
+	background: #B9DFFF;
+	color: #fff;
+	border: 1px solid #eee;
+	border-radius: 20px;
+	box-shadow: 5px 5px 5px #eee;
+	text-shadow: none;
+         padding: 16px 32px;
+         cursor: pointer;
+         font-size:15px;
+}
+.button:hover 
+{
+	background: #016ABC;
+	color: #fff;
+	border: 1px solid #eee;
+	border-radius: 20px;
+	box-shadow: 5px 5px 5px #eee;
+	text-shadow: none;
+         padding: 16px 32px;
+         cursor: pointer;
+         font-size:15px;
+}
+</style>
+</head>
+<body>
+<div>
+<label for="coinweigh">Coin Weight:</label><br>
+<input type="number" id="coinweigh" min="1" placeholder="Enter the common weight for all coins... " required>
+<br>
+<label for="chcoin">Choose a Coin For Changing the Weight: </label><br>
+<select id="chcoin">
+<option value="1">Coin A</option>
+<option value="2">Coin B</option>
+<option value="3">Coin C</option>
+<option value="4">Coin D</option>
+<option value="5">Coin E</option>
+<option value="6">Coin F</option>
+<option value="7">Coin G</option>
+<option value="8">Coin H</option>
+</select>
+<br>
+<label for="chwg">Choose Increase/Decrease:</label><br>
+<select id="chwg">
+<option value="increase">Increase the Weight of Coin</option>
+<option value="decrease">Decrease the Weight of Coin</option>
+</select>
+<br>
+<label for="oddcoinweigh">Odd Coin Weight:</label><br>
+<input type="number" id="newcoinweigh" min="1" placeholder="Enter the odd coin's weight... " required>
+<br>
+<button class="button" onclick="return fieldCheck()">Submit</button>
+</div>
+<script>
+const coins = [];
+function fieldCheck()
+{
+      var m = document.getElementById("coinweigh").value;
+      var n = document.getElementById("newcoinweigh").value;
+      if(m == null || n == null || m == "" || n == "")
+      {
+            alert("Fill the empty fields");
+            return false;
+      }
+      else
+      {
+            validateValue();
+            return true;
+       }
+}
+function validateValue()
+{
+    var m = parseInt(document.getElementById("coinweigh").value);
+    var n = parseInt(document.getElementById("newcoinweigh").value);
+    if(m < 1 || n < 1)
+    {
+          alert("Enter Positive Number for Weights!");
+          return false;
+    }
+    else
+   {
+          storeValue();
+          return true;
+    }
+}
+function storeValue()
+{
+   let x = parseInt(document.getElementById("coinweigh").value);
+   for(let i=0;i<8;i++)
+       coins.push(x); 
+   var str1 = document.getElementById("chwg").value;
+   var a = parseInt(document.getElementById("chcoin").value);
+   var ncwg= parseInt(document.getElementById("newcoinweigh").value);
+   var comp=str1.localeCompare("increase");
+   if(comp==0)
+  {
+          coins[a-1]=coins[a-1]+ncwg;
+  } 
+  else
+  {
+        coins[a-1]=coins[a-1]-ncwg;
+  }
+} 
+</script>
+</body>
+</html>
