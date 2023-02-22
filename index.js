@@ -6,124 +6,13 @@ const CENTER = canvas.width / 2;
 
 c.fillRect(0, 0, canvas.width, canvas.height);
 const img = new Image();
-img.src = "./assets/gcoin-1.gif";
+img.src = "./assets/coin.png";
 
 const gravity = 0.2;
 const coinsVelocities = new Array(8).fill({ x: 10, y: 10 });
 
-const COLLISION = {
-    onLeftPlate: {
-        happend: false,
-        by: [],
-    },
-    onNothing: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onMainBar: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onLeftPlate: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onRightPlate: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onPlatesBalancer: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoinStand: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin1: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin2: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin3: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin4: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin5: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin6: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin7: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-    onCoin8: {
-        sprite: null,
-        happend: false,
-        by: []
-    },
-};
+const inc = CENTER*0.1;
 
-var collisionHappend = false;
-
-function doCollision() {
-    if (collisionHappend) {
-        for (let [key, value] of Object.entries(COLLISION)) {
-            if (value["happend"]) {
-                value.by.forEach(sprite => {
-                    if (value.sprite.position.y < value.sprite.limit.y)
-                        value.sprite.unFreeze();
-                    if (sprite.position.y < sprite.limit.y)
-                        sprite.unFreeze();
-                    // console.log(JSON.stringify(sprite));
-                    sprite.addVelocity({ x: 0, y: 0 });
-                    value.sprite.addVelocity({ x: 0, y: 0 });
-                });
-            }
-        }
-    }
-}
-
-const spritesSet = [
-    {
-        spriteName: "LeftPlate",
-        x: (CENTER * 0.2),
-        y: (CENTER * 2) - (CENTER * 0.5),
-        width: (CENTER * 0.6),
-        height: (CENTER * 0.02)
-    },
-    {
-        spriteName: "RightPlate",
-        x: CENTER + (CENTER * 0.2),
-        y: (CENTER * 2) - (CENTER * 0.5),
-        width: (CENTER * 0.6),
-        height: (CENTER * 0.02)
-    }
-];
 const keys = {
     ArrowRight: false,
     ArrowLeft: false,
@@ -137,7 +26,7 @@ var axis = {
 }
 
 class Sprite {
-    constructor({ shape, position, velocity }) {
+    constructor({ shape, position, velocity ,img,src}) {
         this.position = position;
         this.velocity = velocity;
         this.shape = shape;
@@ -161,6 +50,8 @@ class Sprite {
         };
         this.direction = "stable";
         this.nextMove = true;
+        this.img = img;
+        this.src = src;
     }
 
     unFreeze() {
@@ -171,7 +62,11 @@ class Sprite {
     }
     draw() {
         c.fillStyle = "blue";
+        if(!this.img)
         c.fillRect(this.position.x, this.position.y, this.shape.width, this.shape.height);
+        else{
+            this.img.src = this.src;
+        c.drawImage(this.img, this.position.x, this.position.y, this.shape.width, this.shape.height);}
     }
     update() {
         this.draw();
@@ -181,48 +76,43 @@ class Sprite {
         this.limit.y = y;
     }
     upLift(y) {
-        this.limit.y = this.position.y - y;
-        axis.right = rightPlate.limit.y;
-        axis.left = leftPlate.limit.y;
+        y /= 2;
+        if (this.keyName.startsWith("Coin")) {
+            this.limit.y = this.limit.y - y - (leftPlate.shape.height / 2);
+        } else
+            this.limit.y = this.position.y - y - (this.shape.height / 2);
+
         this.direction = "up";
         this.unFreeze();
         if (this.keyName == "RightPlate") {
-            platec.right.forEach(e => {
-                coins[e].upLift(y);
-                // coins[e].setBoundary(rightPlate.limit);
-                coins[e].setBoundary({...coins[e].limit,y:axis.right});
-            });
-            platec.left.forEach(e => {
-                coins[e].downLift(y);
-                coins[e].setBoundary({...coins[e].limit,y:axis.left});
-            });
+            axis.right = rightPlate.limit.y;
         } else if (this.keyName == "LeftPlate") {
-            platec.right.forEach(e => {
-                coins[e].downLift(y);
-                coins[e].setBoundary({...coins[e].limit,y:axis.right});
-            });
-            platec.left.forEach(e => {
-                coins[e].upLift(y);
-                coins[e].setBoundary(leftPlate.limit);
-            });
+            axis.left = leftPlate.limit.y;
         }
     }
     downLift(y) {
-        this.limit.y = this.position.y + y;
-        axis.right = rightPlate.limit.y;
-        axis.left = leftPlate.limit.y;
+        if (this.keyName.startsWith("Coin")) {
+            this.limit.y = this.limit.y + y;
+        } else
+            this.limit.y = this.position.y + (y - this.shape.height);
+        // axis.right = rightPlate.limit.y;
+        // axis.left = leftPlate.limit.y;
         this.direction = "down";
         this.unFreeze();
         if (this.keyName == "RightPlate") {
+            platesBalancer.rotateClockWise(10);
+            axis.right = rightPlate.limit.y;
             platec.right.forEach(e => {
                 coins[e].downLift(y);
                 coins[e].setBoundary({...coins[e].limit,y:axis.right});
             });
             platec.left.forEach(e => {
-                coins[e].upLift(y);
                 coins[e].setBoundary({...coins[e].limit,y:axis.left});
+                coins[e].upLift(y);
             });
         } else if (this.keyName == "LeftPlate") {
+            platesBalancer.rotateAntiClockWise(10);
+            axis.left = leftPlate.limit.y;
             platec.right.forEach(e => {
                 coins[e].upLift(y);
                 coins[e].setBoundary({...coins[e].limit,y:axis.right});
@@ -282,11 +172,11 @@ class Coin extends Sprite {
                 } else {
                     this.velocity.y -= gravity;
                 }
-                if (this.position.x + this.shape.width <= this.limit.x) {
-                    this.velocity.x = 0;
-                } else {
-                    this.velocity.x -= gravity;
-                }
+                // if (this.position.x + this.shape.width <= this.limit.x) {
+                //     this.velocity.x = 0;
+                // } else {
+                //     this.velocity.x -= gravity;
+                // }
             }
         }
     }
@@ -300,7 +190,15 @@ class Plate extends Sprite {
             x: this.limit.x,
             y: (CENTER * 2) - 100
         };
+        props.img = new Image();
+        props.img.src = "./assets/plate.png";
+        this.img = props.img;
     }
+
+    draw(){
+        c.drawImage(this.img, this.position.x-((CENTER*0.20)), this.position.y-(this.shape.height+CENTER*0.7), this.shape.width+(CENTER*0.2), this.shape.height+(CENTER));
+    }
+
     update() {
         this.draw();
         if (this.direction == "down") {
@@ -329,6 +227,69 @@ class Plate extends Sprite {
             }
         }
     }
+
+}
+
+class PlatesBalancer extends Sprite {
+    constructor(props) {
+        super(props);
+        this.freezeIt = true;
+        this.angle = 0;
+        this.limit = {
+            angle: 0
+        };
+    }
+
+    draw() {
+        c.fillStyle = "blue";
+        c.save();
+        c.beginPath();
+        c.translate(this.position.x + this.shape.width / 2, this.position.y + this.shape.height);
+        c.rotate((this.angle) * (Math.PI / 180));
+        // c.translate(-this.position.x+this.shape.width/2,-this.position.y+this.shape.height/2);
+        c.rect(-this.shape.width / 2, -this.shape.height , this.shape.width, this.shape.height);
+        c.fill();
+        // c.beginPath();
+        // c.moveTo(this.position.x,this.position.y);
+        // c.lineTo(this.position.x+this.shape.width,this.position.y);
+        // c.lineTo(this.position.x+this.shape.width,this.position.y+this.shape.height);
+        // c.lineTo(this.position.x,this.position.y+this.shape.height);
+        // c.stroke();
+        // c.fill();
+        c.restore();
+    }
+
+    rotateClockWise(angle) {
+        this.limit.angle += angle;
+        this.direction = "clockwise";
+        this.unFreeze();
+    }
+
+    rotateAntiClockWise(angle) {
+        this.limit.angle = -(Math.abs(this.limit.angle)+angle);
+        this.direction = "anticlockwise";
+        this.unFreeze();
+    }
+
+    update() {
+        this.draw();
+        if (!this.freezeIt) {
+            if (this.direction == "clockwise") {
+                if (this.angle < this.limit.angle) {
+                    this.angle += gravity;
+                } else {
+                    this.freeze();
+                }
+            }else{
+                if (this.angle > this.limit.angle) {
+                    this.angle -= gravity;
+                } else {
+                    this.freeze();
+                }
+            }
+        }
+    }
+
 
 }
 
@@ -382,20 +343,22 @@ const coins = new Array(8).fill(0).map((_, i) => {
 
 const mainBar = new Sprite({
     position: {
-        x: CENTER - (CENTER * 0.025),
+        x: CENTER - (CENTER * 0.2),
         y: CENTER - Math.floor(CENTER * (50 / 100))
     },
     shape: {
-        width: (CENTER * 0.05),
-        height: CENTER + (CENTER * 0.20)
+        width: (CENTER * 0.4),
+        height: CENTER + (CENTER * 0.50)
     },
     velocity: {
         x: 0,
         y: 0
-    }
+    },
+    img:new Image(),
+    src:"./assets/mainbar.png"
 });
 
-const platesBalancer = new Sprite({
+const platesBalancer = new PlatesBalancer({
     position: {
         x: CENTER / 2,
         y: (CENTER / 2) + (CENTER * 0.12)
@@ -422,7 +385,7 @@ const leftPlate = new Plate({
     velocity: {
         x: 0,
         y: 0
-    }
+    },
 });
 
 const rightPlate = new Plate({
@@ -458,10 +421,13 @@ const coinStand = new Sprite({
 rightPlate.keyName = "RightPlate";
 leftPlate.keyName = "LeftPlate";
 document.getElementById("b").onclick = function () {
-    coins[parseInt(document.getElementById("i").value)].unFreeze();
-    coins[parseInt(document.getElementById("i").value)].direction = "down";
-    console.log("----------------------------");
-    coins.forEach(e=>console.log(e.keyName+" "+JSON.stringify(e.position)));
+    let index = parseInt(document.getElementById("i").value);
+    coins[index].unFreeze();
+    coins[index].direction = "down";
+    if(index <3)
+    coins[index].setBoundary({y:leftPlate.position.y,x:coins[index].limit.x});
+    else
+    coins[index].setBoundary({y:rightPlate.position.y,x:coins[index].limit.x});
 }
 
 var platec = {
@@ -474,8 +440,7 @@ function animate() {
     c.clearRect(0, 0, canvas.width, canvas.height);
     mainBar.update();
     platesBalancer.update();
-    leftPlate.update();
-    rightPlate.update();
+    
     coinStand.update();
     coins.forEach(coin => {
         coin.update();
@@ -487,17 +452,19 @@ function animate() {
             if (coinNumber > 3) {
                 if (platec.right.indexOf(coinNumber - 1) == -1)
                     platec.right.push(coinNumber - 1);
-                rightPlate.downLift(50);
-                leftPlate.upLift(50);
+                rightPlate.downLift(inc);
+                leftPlate.upLift(inc);
 
             } else {
                 if (platec.left.indexOf(coinNumber - 1) == -1)
                     platec.left.push(coinNumber - 1);
-                rightPlate.upLift(50);
-                leftPlate.downLift(50);
+                rightPlate.upLift(inc);
+                leftPlate.downLift(inc);
             }
         }
     });
+    leftPlate.update();
+    rightPlate.update();
 }
 
 window.addEventListener("keydown", (event) => {
