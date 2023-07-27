@@ -1,15 +1,147 @@
 *{
+    /* border: 1px solid; */
     box-sizing: border-box;
     margin: 0;
 }
 
-
-canvas{
-    border: 1px solid white;
-    background-color: black;
-    margin: 0 auto;
+#mycanvas,.current-state{
+/*z-index:-2;*/
+display:none;
 }
 
-body{
-    background-color: black;
+
+.main{
+    display: grid;
+    grid-template-areas: 
+    "e e e e e"
+    "a a a a a"
+    "a a a a a"
+    "a a a a a"
+    "c c c c c"
+    ;
+    column-gap: 2%;
+    row-gap: 2vh;
+    width:100%;
+} 
+
+.main-header{
+    grid-area: e;
+}
+
+.main-header h1{
+    font-size: 2.5em;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 100;
+    text-shadow: 0px 0px 0px 0px 10px ;
+}
+
+.canvas-container{
+    grid-area: a;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: space-around;
+}
+
+canvas{
+    border: 10px ridge;
+    align-self: center;
+}
+
+.info-box{
+    grid-area: b;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 5vw;
+}
+
+.info-box *{
+    width: 100%;
+    justify-self: stretch;
+    padding: 10px 10px;
+}
+
+input[type=number], select 
+{
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.current-state{
+    font-size:x-large;
+    grid-area: c;
+    justify-self: center;
+}
+
+.state-place{
+    width: 110%;
+}
+
+.button
+{
+	background: #B9DFFF;
+	color: #fff;
+	border: 1px solid #eee;
+	border-radius: 20px;
+	box-shadow: 5px 5px 5px #eee;
+	text-shadow: none;
+                      padding: 16px 32px;
+                      cursor: pointer;
+                      font-size:15px;
+}
+.button:hover 
+{
+	background: #016ABC;
+	color: #fff;
+	border: 1px solid #eee;
+	border-radius: 20px;
+	box-shadow: 5px 5px 5px #eee;
+	text-shadow: none;
+                      padding: 16px 32px;
+                      cursor: pointer;
+                     font-size:15px;
+}
+
+svg{
+    grid-area: d;
+    margin: 0 auto;
+    height: 5vh;
+}
+
+@media only screen and (max-width:900px) {
+    body{
+        display: grid;
+        grid-template-areas: 
+        "e e"
+        "a a"
+        "a a"
+        "c c"
+        "c c"
+        "b b"
+        ;
+        column-gap: 0;
+    }
+
+    body > *{
+        width: 100%;
+    }
+
+    .canvas-container{
+        width: 100%;
+    }
+
+    .button{
+        width: max-content;
+        align-self: center;
+    }
+
+    .current-state{
+        padding: 0 4vw;
+        margin-top: 5vh;
+    }
 }

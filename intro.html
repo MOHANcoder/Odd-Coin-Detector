@@ -40,7 +40,7 @@ input[type=number], select
 <body>
 <div>
 <label for="coinweigh">Coin Weight:</label><br>
-<input type="number" id="coinweigh" min="1" placeholder="Enter the common weight for all coins... " required>
+<input type="number" id="coinweigh" min="1" placeholder="Enter the common weight for all coinsarr... " required>
 <br>
 <label for="chcoin">Choose a Coin For Changing the Weight: </label><br>
 <select id="chcoin">
@@ -66,7 +66,7 @@ input[type=number], select
 <button class="button" onclick="return fieldCheck()">Submit</button>
 </div>
 <script>
-const coins = [];
+const coinsarr = [];
 function fieldCheck()
 {
       var m = document.getElementById("coinweigh").value;
@@ -101,19 +101,20 @@ function storeValue()
 {
    let x = parseInt(document.getElementById("coinweigh").value);
    for(let i=0;i<8;i++)
-       coins.push(x); 
+       coinsarr.push(x); 
    var str1 = document.getElementById("chwg").value;
    var a = parseInt(document.getElementById("chcoin").value);
    var ncwg= parseInt(document.getElementById("newcoinweigh").value);
    var comp=str1.localeCompare("increase");
    if(comp==0)
   {
-          coins[a-1]=coins[a-1]+ncwg;
+          coinsarr[a-1]=coinsarr[a-1]+ncwg;
   } 
   else
   {
-        coins[a-1]=coins[a-1]-ncwg;
+        coinsarr[a-1]=coinsarr[a-1]-ncwg;
   }
+  console.log(coinsarr);
 } 
 </script>
 </body>

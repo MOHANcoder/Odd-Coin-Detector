@@ -57,19 +57,14 @@ class Sprite {
             1: true,
             2: false
         };
-        this.direction = {
-            x: "stable",
-            y: "stable"
-        };
+        this.direction = "stable";
         this.nextMove = true;
         this.img = img;
         this.src = src;
-        this.mass = 0.0;
     }
 
     unFreeze() {
         this.freezeIt = false;
-        // console.log(this.keyName+"UNFREEZED");
     }
     freeze() {
         this.freezeIt = true;
@@ -93,16 +88,11 @@ class Sprite {
     upLift(y) {
         y /= 2;
         if (this.keyName.startsWith("Coin")) {
-            // console.log(this.limit.y + " " + (this.position.y - y - (CENTER * 0.02)) + " " + (this.position.y));
-            // this.limit.y = this.limit.y - (y*2) - (leftPlate.shape.height);
-            if (this.lastMove == "right")
-                this.limit.y = this.position.y - y - (CENTER * 0.02);
-            else
-                this.limit.y = this.position.y - y - (CENTER * 0.02);
+            this.limit.y = this.limit.y - y - (leftPlate.shape.height / 2);
         } else
             this.limit.y = this.position.y - y - (this.shape.height / 2);
 
-        this.direction.y = "up";
+        this.direction = "up";
         this.unFreeze();
         if (this.keyName == "RightPlate") {
             axis.right = rightPlate.limit.y;
@@ -117,11 +107,10 @@ class Sprite {
             this.limit.y = this.position.y + (y - this.shape.height);
         // axis.right = rightPlate.limit.y;
         // axis.left = leftPlate.limit.y;
-        this.direction.y = "down";
+        this.direction = "down";
         this.unFreeze();
         if (this.keyName == "RightPlate") {
             platesBalancer.rotateClockWise(7);
-            // platesBalancer.freeze();
             axis.right = rightPlate.limit.y;
             platec.right.forEach(e => {
                 coins[e].downLift(y);
@@ -135,8 +124,8 @@ class Sprite {
             platesBalancer.rotateAntiClockWise(7);
             axis.left = leftPlate.limit.y;
             platec.right.forEach(e => {
-                coins[e].setBoundary({ ...coins[e].limit, y: axis.right });
                 coins[e].upLift(y);
+                coins[e].setBoundary({ ...coins[e].limit, y: axis.right });
             });
             platec.left.forEach(e => {
                 coins[e].downLift(y);
@@ -156,14 +145,6 @@ class Coin extends Sprite {
     constructor(props) {
         super(props);
         this.freezeIt = false;
-        this.lastMove = this.direction.x;
-        this.direction = {
-            x: "stable",
-            y: "stable"
-        };
-        this.currentStage = "first";
-        this.keyNumber = null;
-        this.flag0 = false;
     }
 
     draw() {
@@ -173,124 +154,75 @@ class Coin extends Sprite {
     update() {
         this.draw();
         this.checkAndChangeItToStageTwo();
-        this.flag0 = false;
-        if (!this.freezeIt) {
-            switch (this.direction.y) {
-                case "up":
-                    if ((this.position.y) >= this.limit.y) {
-                        this.velocity.y -= gravity;
-                        this.flag0 = true;
-                        // console.log(this.keyName+" "+flag);
-                    } else {
+        if (this.direction == "down") {
+            if (!this.freezeIt) {
+                if (this.keyName != "Coin7") {
+                    this.position.x += this.velocity.x;
+                    this.position.y += this.velocity.y;
+                    if (((this.position.y + this.shape.height) >= this.limit.y)) {
                         this.velocity.y = 0;
-                        // console.log("NO" + this.position.y);
-                        if (isStartOver) {
-                            this.position.y = this.limit.y;
-                            // this.freeze();
-                        }
-                        // this.freeze();
-                    }
-                    break;
-                case "down":
-                    if ((this.position.y + this.shape.height) <= this.limit.y) {
+                        this.freeze();
+                        this.direction = "reached";
+                    } else {
                         this.velocity.y += gravity;
-                        this.flag0 = true;
-                        // console.log(this.keyName+" "+flag);
-                    } else {
-                        this.velocity.y = 0;
-                        // console.log("NO" + this.position.y);
-                        if (isStartOver) {
-                            this.position.y = this.limit.y;
-                            // this.freeze();
-                        }
-                        // this.freeze();
                     }
-                    break;
-            }
-
-            switch (this.direction.x) {
-                case "left":
-                    if (this.position.x >= this.limit.x) {
-                        this.velocity.x -= gravity;
-                        this.flag0 = true;
-                        // console.log(this.keyName+" "+flag);
-                    } else {
+                    if (this.position.x + this.shape.width >= this.limit.x) {
                         this.velocity.x = 0;
-                        // console.log("NO" + this.position.x);
-                        if (isStartOver) {
-                            this.position.x = this.limit.x;
-                            // this.freeze();
-                        }
-                        // this.freeze();
-                    }
-                    break;
-                case "right":
-                    if ((this.position.x + this.shape.width) <= this.limit.x) {
+                    } else {
                         this.velocity.x += gravity;
-                        this.flag0 = true;
-                        // console.log(this.keyName+" "+flag);
-                    } else {
-                        this.velocity.x = 0;
-                        // console.log("NO" + this.position.x);
-                        if (isStartOver) {
-                            this.position.x = this.limit.x;
-                            // this.freeze();
-                        }
-                        // this.freeze();
                     }
-                    break;
+                } else {
+
+
+
+
+                    this.position.x += this.velocity.x;
+                    this.position.y += this.velocity.y;
+                    if (((this.position.y + this.shape.height) >= this.limit.y)) {
+                        console.log((this.position.y + this.shape.height) +" = "+ this.limit.y);
+                        this.velocity.y = 0;
+                        this.freeze();
+                        this.direction = "reached";
+                    } else {
+                        this.velocity.y += gravity;
+                    }
+                    if (this.position.x - this.shape.width <= this.limit.x) {
+                        this.velocity.x = 0;
+                    } else {
+                        this.velocity.x -= gravity;
+                    }
+
+
+
+
+                }
             }
-
-            this.position.x += this.velocity.x;
-            this.position.y += this.velocity.y;
-
-            if (!this.flag0 && this.currentStage == "first" && !isStartOver) {
-                // console.log(!flag && this.currentStage == "first" && this.direction.x != "stable" && this.direction.y != "stable");
-                this.freeze();
-                // console.log(this.keyName);
-                this.currentStage = "second";
-                this.lastMove = this.direction.x;
-                switch (this.direction.y) {
-                    case "down":
-                        switch (this.direction.x) {
-                            case "left":
-                                if (platec.left.indexOf(this.keyNumber) == -1)
-                                    platec.left.push(this.keyNumber);
-                                // console.log(JSON.stringify(rightPlate.position) + " " + JSON.stringify(positions.right))
-                                rightPlate.upLift(this.mass / 100 * CENTER);
-                                leftPlate.downLift(this.mass / 100 * CENTER);
-                                break;
-                            case "right":
-                                if (platec.right.indexOf(this.keyNumber) == -1)
-                                    platec.right.push(this.keyNumber);
-                                // console.log("yes");
-                                rightPlate.downLift(this.mass / 100 * CENTER);
-                                leftPlate.upLift(this.mass / 100 * CENTER);
-                                break;
-                        }
-                        break;
-                    case "up":
-                        switch (this.direction.x) {
-                            case "left":
-                                if (platec.left.indexOf(this.keyNumber) == -1)
-                                    platec.left.push(this.keyNumber);
-                                rightPlate.downLift(this.mass / 100 * CENTER);
-                                leftPlate.upLift(this.mass / 100 * CENTER);
-                                break;
-                            case "right":
-                                if (platec.right.indexOf(this.keyNumber) == -1)
-                                    platec.right.push(this.keyNumber);
-                                rightPlate.upLift(this.mass / 100 * CENTER);
-                                leftPlate.downLift(this.mass / 100 * CENTER);
-                                break;
-                        }
-                        break;
+        } else if (this.direction == "up") {
+            if (!this.freezeIt) {
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                if (((this.position.y +this.shape.height) <= this.limit.y)) {
+                    if(isStartOver){
+                        this.position.y = this.limit.y;
+                    }
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y -= gravity;
+                }
+                if (this.position.x + this.shape.width >= this.limit.x) {
+                    if(isStartOver){
+                        this.position.x = this.limit.x;
+                    }
+                    this.velocity.x = 0;
+                } else {
+                    if(this.keyName == "Coin7")
+                    console.log(this.position.x+" "+this.limit.x +" "+(this.position.x + this.shape.width >= this.limit.x));
+                    this.velocity.x -= gravity;
                 }
             }
         }
-
-
-
     }
 }
 
@@ -314,31 +246,33 @@ class Plate extends Sprite {
 
     update() {
         this.draw();
-        if (!this.freezeIt) {
-            this.position.x += this.velocity.x;
-            this.position.y += this.velocity.y;
-            switch (this.direction.y) {
-                case "down":
-                    if (((this.position.y + this.shape.height) >= this.limit.y)) {
-                        this.velocity.y = 0;
-                        this.freeze();
-                        this.direction.y = "reached";
-                    } else {
-                        this.velocity.y += gravity;
-                    }
-                    break;
-                case "up":
-                    if (((this.position.y + this.shape.height) <= this.limit.y)) {
-                        this.velocity.y = 0;
-                        this.freeze();
-                        this.direction.y = "reached";
-                    } else {
-                        this.velocity.y -= gravity;
-                    }
-                    break;
+        if (this.direction == "down") {
+            if (!this.freezeIt) {
+                this.position.y += this.velocity.y;
+                if (((this.position.y + this.shape.height) >= this.limit.y)) {
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y += gravity;
+                }
+            }
+        } else {
+            if (!this.freezeIt) {
+                // this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                if (((this.position.y + this.shape.height) <= this.limit.y)) {
+                    this.velocity.y = 0;
+                    this.freeze();
+                    this.direction = "reached";
+                } else {
+                    this.velocity.y -= gravity;
+                }
+
             }
         }
     }
+
 }
 
 class PlatesBalancer extends Sprite {
@@ -388,7 +322,6 @@ class PlatesBalancer extends Sprite {
         this.limit.angle += angle;
         this.direction = "clockwise";
         this.unFreeze();
-        // console.log(coins[0]);
     }
 
     rotateAntiClockWise(angle) {
@@ -402,25 +335,21 @@ class PlatesBalancer extends Sprite {
     update() {
         this.draw();
         if (!this.freezeIt) {
-            // console.log(this.direction);
-            switch (this.direction) {
-                case "clockwise":
-                    if (this.angle <= this.limit.angle) {
-                        this.angle += (gravity);
-                    } else {
-                        this.freeze();
-                    }
-                    break;
-                case "anticlockwise":
-                    if ((this.angle >= this.limit.angle)) {
-                        this.angle -= (gravity);
-                    } else {
-                        this.freeze();
-                    }
-                    break;
+            if (this.direction == "clockwise") {
+                if (this.angle <= this.limit.angle) {
+                    this.angle += (gravity);
+                } else {
+                    this.freeze();
+                }
+            } else {
+                // console.log(this.angle);
+                if ((this.angle >= this.limit.angle)) {
+                    this.angle -= (gravity);
+                } else {
+                    this.freeze();
+                }
             }
         }
-
     }
 
 
@@ -444,12 +373,9 @@ const coins = new Array(8).fill(0).map((_, i) => {
         shape: coinShape
     });
 
-    _.mass = 10;
-
     _.unFreeze();
 
     _.keyName = `Coin${i + 1}`;
-    _.keyNumber = i;
 
     if (i < 3 || i == 6)
         _.setBoundary({
@@ -565,19 +491,12 @@ const coinStand = new Sprite({
 
 function temp() {
     let index = parseInt(document.getElementById("i").value);
-    let d = document.getElementById("s").value;
     coins[index].unFreeze();
-    coins[index].direction.y = "down";
-    isStartOver = false;
-    if (d == "left") {
-        coins[index].direction.x = "left";
-        coins[index].setBoundary({ y: leftPlate.position.y, x: (CENTER * 0.36) });
-    }
-    else {
-        coins[index].direction.x = "right";
-        // ((i - 2) * (0.1 * CENTER * 2)) + (CENTER + (CENTER * 0.2))
-        coins[index].setBoundary({ y: rightPlate.position.y, x: ((2) * (0.1 * CENTER * 2)) + (CENTER + (CENTER * 0.2)) });
-    }
+    coins[index].direction = "down";
+    if (index < 3 || index == 6)
+        coins[index].setBoundary({ y: leftPlate.position.y, x: coins[index].limit.x });
+    else
+        coins[index].setBoundary({ y: rightPlate.position.y, x: coins[index].limit.x });
 
 }
 
@@ -586,43 +505,21 @@ function temp() {
 rightPlate.keyName = "RightPlate";
 leftPlate.keyName = "LeftPlate";
 var isStartOver = false;
-/*document.getElementById("ii").addEventListener("click", () => {
+document.getElementById("ii").addEventListener("click", () => {
     coins.forEach((c, i) => {
         c.setBoundary({
             x: (positions.coin.x * (i + 1)),
             y: positions.coin.y
         });
-        c.direction.y = "up";
-        c.direction.x = "left";
-        c.currentStage = "first";
+        c.direction = "up";
         c.unFreeze();
     });
-    platec.left = [];
-    platec.right = [];
     isStartOver = true;
-    leftPlate.direction = {
-        x: 'stable', y: "stable"
-    };
-    rightPlate.direction = {
-        x: "stable", y: "stable"
-    };
-    leftPlate.position.y = positions.left.y;
-    rightPlate.position.y = positions.right.y;
-    leftPlate.freeze();
-    rightPlate.freeze();
-    platesBalancer.freeze();
-    platesBalancer.direction = "stable";
-    platesBalancer.position = {
-        x: (CENTER / 2) - (CENTER * 0.05),
-        y: (CENTER / 2) + (CENTER * 0.45)
-    };
-    axis = {
-        right: (CENTER * 2) - 100,
-        left: (CENTER * 2) - 100
-    };
+    leftPlate.position = positions.left;
+    rightPlate.position = positions.right;
     platesBalancer.angle = 0;
 });
-document.getElementById("b").onclick = temp;*/
+document.getElementById("b").onclick = temp;
 
 var platec = {
     left: [],
@@ -644,40 +541,37 @@ var positions = {
     }
 }
 
-let nn = 0;
-let afterStartOver = false;
-
 function animate() {
     window.requestAnimationFrame(animate);
-    nn = 0;
     c.fillStyle = "white";
     c.clearRect(0, 0, canvas.width, canvas.height);
     mainBar.update();
-    coins.forEach(coin => {
-        if (coin.position.y == coin.limit.y) {
-            if (isStartOver) {
-                coin.freeze();
-                platesBalancer.freeze();
-                platesBalancer.direction = "stable";
-            }
-        }
-    });
     platesBalancer.update();
 
-    //coinStand.update();
-    coins.forEach(coin => nn += ((coin.freezeIt) ? 1 : 0));
+    coinStand.update();
     coins.forEach(coin => {
-        if (coin.position.y == coin.limit.y) {
-            if (isStartOver) {
-                coin.freeze();
-                platesBalancer.freeze();
-                platesBalancer.direction = "stable";
-                leftPlate.freeze();
-                rightPlate.freeze();
-                afterStartOver = true;
+        coin.update();
+        if (!isStartOver) {
+
+            if (coin.direction == "reached" && coin.nextMove) {
+                console.log("stage 2");
+                // coin.downLift(50);
+                coin.nextMove = !coin.nextMove;
+                let coinNumber = parseInt(coin.keyName.substring(coin.keyName.length - 1))
+                if (coinNumber > 3 && coinNumber != 7) {
+                    if (platec.right.indexOf(coinNumber - 1) == -1)
+                        platec.right.push(coinNumber - 1);
+                    rightPlate.downLift(inc);
+                    leftPlate.upLift(inc);
+
+                } else {
+                    if (platec.left.indexOf(coinNumber - 1) == -1)
+                        platec.left.push(coinNumber - 1);
+                    rightPlate.upLift(inc);
+                    leftPlate.downLift(inc);
+                }
             }
         }
-        coin.update();
     });
     leftPlate.update();
     rightPlate.update();
@@ -698,7 +592,7 @@ window.addEventListener("keydown", (event) => {
 
 animate();
 
-/*function change() {
+function change() {
     let value = 0;
     let t =
         setInterval(() => {
@@ -709,63 +603,4 @@ animate();
                 temp();
             }
         }, 2000);
-}*/
-
-function callCoins(a, b) {
-    let nums = 1;
-    a.forEach((c) => {
-        setTimeout(() => {
-            coins[c].unFreeze();
-            coins[c].direction.y = "down";
-            coins[c].direction.x = "left";
-            coins[c].setBoundary({ y: leftPlate.position.y, x: (CENTER * 0.36) });
-        }, nums++*2000);
-    });
-   // setTimeout(()=>{
-b.forEach(c => {
-        setTimeout(() => {
-            coins[c].unFreeze();
-            coins[c].direction.y = "down";
-            coins[c].direction.x = "right";
-            coins[c].setBoundary({ y: rightPlate.position.y, x: ((2) * (0.1 * CENTER * 2)) + (CENTER + (CENTER * 0.2)) });
-        }, nums++*2000);
-    });
-    isStartOver = false;
-}
-
-function reStart() {
-    coins.forEach((c, i) => {
-        c.setBoundary({
-            x: (positions.coin.x * (i + 1)),
-            y: positions.coin.y
-        });
-        c.direction.y = "up";
-        c.direction.x = "left";
-        c.currentStage = "first";
-        c.unFreeze();
-    });
-    platec.left = [];
-    platec.right = [];
-    isStartOver = true;
-    leftPlate.direction = {
-        x: 'stable', y: "stable"
-    };
-    rightPlate.direction = {
-        x: "stable", y: "stable"
-    };
-    leftPlate.position.y = positions.left.y;
-    rightPlate.position.y = positions.right.y;
-    leftPlate.freeze();
-    rightPlate.freeze();
-    platesBalancer.freeze();
-    platesBalancer.direction = "stable";
-    platesBalancer.position = {
-        x: (CENTER / 2) - (CENTER * 0.05),
-        y: (CENTER / 2) + (CENTER * 0.45)
-    };
-    axis = {
-        right: (CENTER * 2) - 100,
-        left: (CENTER * 2) - 100
-    };
-    platesBalancer.angle = 0;
 }
