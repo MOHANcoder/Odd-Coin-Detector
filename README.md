@@ -1,6 +1,6 @@
-# eightCoins
-A canvas based website for solving famous "Eight Coins" problem.
-This solver simulates the solving method different coin weights.
+# Odd Coin Detector
+A canvas-based website for solving the famous "Eight Coins" problem.
+This solver simulates the solving method for different coin weights.
 Images:
 ![Screenshot (66)](https://github.com/MOHANcoder/eightCoins/assets/101055189/b353706b-c88f-4efb-a0fd-8476e86bd387)
 
