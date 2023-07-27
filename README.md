@@ -6,4 +6,6 @@ Images:
 
 ![Screenshot (67)](https://github.com/MOHANcoder/eightCoins/assets/101055189/e7a998c4-da4f-4deb-b46a-5570a5ca6703)
 
+![Screenshot (69)](https://github.com/MOHANcoder/Odd-Coin-Detector/assets/101055189/5807d81d-0ea3-48ee-9380-e20e414bfeff)
+
 ![Screenshot (65)](https://github.com/MOHANcoder/eightCoins/assets/101055189/937cceb0-07ca-4640-a322-500768cbaabd)
